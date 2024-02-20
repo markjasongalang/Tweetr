@@ -81,10 +81,14 @@ namespace Tweetr.Pages.Profile
                 return RedirectToPage("Index", new { viewedUsername = username });
             }
 
-            // TODO: Add validation for image file formats
-
             var profileImageLocation = Path.Combine(webRootPath, @"images/profile");
-            var extension = Path.GetExtension(files[0].FileName);
+            var extension = Path.GetExtension(files[0].FileName).ToLower();
+
+            string[] imageFileTypes = [".jpeg", ".jfif", ".jpg", ".pjpeg", ".pjp", ".png"];
+            if (!imageFileTypes.Contains(extension))
+            {
+                return RedirectToPage("Index", new { viewedUsername = username });
+            }
 
             using (var fileStream = new FileStream(Path.Combine(profileImageLocation, username + extension), FileMode.Create))
             {
