@@ -1,0 +1,91 @@
+﻿@page
+@model Tweetr.Pages.Posts.IndexModel
+
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Create Post Modal -->
+<div class="modal fade" id="create-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Create a post</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post" asp-page-handler="Create">
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <textarea class="post-text-area" asp-for="Post.Content" placeholder="Write here..."></textarea>
+                    <span asp-validation-for="Post.Content" class="text-danger"></span>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="confirm-post-btn" type="submit" class="btn btn-primary">Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if (Model.IsLoggedIn)
+{    
+    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#create-modal">
+        Create post <i class="bi bi-plus-lg"></i>
+    </button>
+    <br /><br />
+}
+
+@foreach (var item in Model.Posts)
+{
+    <a style="color: inherit; text-decoration: none;" asp-page="./Details" asp-route-id="@item.Id">
+        <div class="card mb-3">
+            <div class="card-body">
+                <p>
+                    <strong>@Html.DisplayFor(modelItem => item.Name)</strong>
+                    <span class="text-secondary">&#64;@Html.DisplayFor(modelItem => item.Username) &#183; @Html.DisplayFor(modelItem => item.DatePosted)</span>
+                </p>
+
+                <p style="white-space: pre-line;">@Html.DisplayFor(modelItem => item.Content)</p>
+
+                <p>
+                    <i class="bi bi-heart"></i>@item.TotalLikes&nbsp;
+                    <i class="bi bi-chat"></i>@item.TotalComments&nbsp;
+                    <i class="bi bi-send"></i>@item.TotalReposts
+                </p>
+            </div>
+        </div>
+    </a>
+}
+
+<script>
+    document.addEventListener("DOMContentLoaded", (e) => { // Home Page Alerts
+        // When a post has been deleted
+        if (sessionStorage.getItem('postDeleted') == 'true') {
+            toastr.success('Post successfully deleted!');
+            sessionStorage.removeItem('postDeleted');
+        }
+
+        // When a post has been created
+        if (sessionStorage.getItem('postCreated') == 'true') {
+            toastr.success('Post successfully created!');
+            sessionStorage.removeItem('postCreated');
+        }
+    });
+
+    // Enable notification for newly created post
+    const confirmPostBtn = document.querySelector('#confirm-post-btn');
+    confirmPostBtn.addEventListener('click', (e) => {
+        sessionStorage.setItem('postCreated', 'true');
+    });
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

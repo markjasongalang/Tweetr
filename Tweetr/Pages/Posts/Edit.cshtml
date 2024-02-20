@@ -1,0 +1,32 @@
+﻿@page
+@model Tweetr.Pages.Posts.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h4>Edit Post</h4>
+<hr />
+<div class="row">
+    <div class="mb-3">
+        <form method="post">
+
+            <!-- Content -->
+            <div class="form-group mb-3">
+                <textarea asp-for="Post.Content" class="form-control" rows="10"></textarea>
+                <span asp-validation-for="Post.Content" class="text-danger"></span>
+            </div>
+
+            <!-- Submit -->
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary" />
+                <a class="btn btn-link" asp-page="./Details" asp-route-id="@Model.Post.Id">Back</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

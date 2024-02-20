@@ -1,0 +1,205 @@
+﻿@page
+@model Tweetr.Pages.Posts.DetailsModel
+
+@{
+    ViewData["Title"] = "Post";
+}
+
+<!-- Edit Post Modal -->
+<div class="modal fade" id="edit-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Edit post</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form method="post" asp-page-handler="Edit" asp-route-id="@Model.Post.Id">
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <textarea class="post-text-area" asp-for="@Model.EditPostText"></textarea>
+                    <span asp-validation-for="Post.Content" class="text-danger"></span>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="confirm-edit-btn" type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Post Modal -->
+<div class="modal fade" id="delete-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Confirm delete</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <p>Are you sure you want to delete this post?</p>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+
+                <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Post.Id">
+                    <button id="confirm-delete-btn" type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p>
+    <a asp-page="./Index"><i class="bi bi-arrow-left"></i></a>
+    <span class="h5">Post</span>
+</p>
+<hr />
+
+<div class="container">
+    <div class="d-flex justify-content-between">
+        <div>
+            <p>
+                <a style="color: inherit; text-decoration: none;" asp-page="/Profile/Index" asp-route-viewedUsername="@Model.Post.Username">
+                    <strong>@Html.DisplayFor(model => model.Post.Name)</strong><br />
+                    <span class="text-secondary">&#64;@Html.DisplayFor(model => model.Post.Username)</span>
+                </a>
+            </p>
+        </div>
+
+        @if (Model.IsOwnPost)
+        {
+            <div>
+                <!-- Edit -->
+                <button id="show-edit-modal-btn" type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#edit-modal">
+                    Edit
+                </button>
+
+                <!-- Delete -->
+                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#delete-modal">
+                    Delete
+                </button>
+            </div>
+        }
+    </div>
+
+    <p style="white-space: pre-line;">@Html.DisplayFor(model => model.Post.Content)</p>
+
+    <p class="text-secondary">
+        @Model.Post.DatePosted
+    </p>
+
+    <div class="d-flex gap-2">
+        <form method="post" >
+            <!-- Like/Unlike -->
+            @if (!Model.IsLiked)
+            {
+                <button asp-page-handler="Like" asp-route-id="@Model.Post.Id" type="submit" class="btn btn-outline-primary"><i class="bi bi-heart"></i>&nbsp;@Model.Post.TotalLikes</button>
+            }
+            else
+            {
+                <button asp-page-handler="Unlike" asp-route-id="@Model.Post.Id" type="submit" class="btn btn-outline-primary"><i class="bi bi-heart-fill"></i>&nbsp;@Model.Post.TotalLikes</button>
+            }
+
+            <!-- Comment -->
+            <span id="comment-focus-btn" class="btn btn-outline-primary"><i class="bi bi-chat"></i>&nbsp;@Model.Post.TotalComments</span>
+
+            <!-- Repost -->
+            <button asp-page-handler="" asp-route-id="@Model.Post.Id" type="submit" class="btn btn-outline-primary"><i class="bi bi-send"></i>&nbsp;0</button>
+        </form>
+    </div>
+</div>
+
+<hr />
+
+<div class="container">
+    <!-- Type a comment -->
+    <div class="mb-3">
+        <form asp-page-handler="Comment" method="post" asp-route-id="@Model.Post.Id">
+            <textarea id="comment-box" asp-for="@Model.Comment" class="form-control" rows="3" placeholder="Post your comment"></textarea>
+            
+            <span asp-validation-for="@Model.Comment" class="text-danger"></span>
+            @if (ModelState["Comment"] != null) // Get specific model from ModelState
+            {
+                <br />
+            }
+
+            <input class="btn btn-outline-primary" type="submit" value="Enter" />
+        </form>
+    </div>
+
+    <!-- Comment list -->
+    @foreach (var comment in Model.Comments)
+    {
+        <div class="mb-3">
+            <p>
+                <a style="color: inherit; text-decoration: none;" asp-page="/Profile/Index" asp-route-viewedUsername="@comment.Username">
+                    <strong>@comment.Name</strong>&nbsp;<span class="text-secondary">&#64;@comment.Username &#183; @Html.DisplayFor(modelItem => comment.DatePosted)</span>
+                </a>
+            </p>
+
+            <p style="white-space: pre-line;">@comment.Content</p>
+        </div>
+        <hr />
+    }
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (e) => {
+        if (sessionStorage.getItem('postEdited') == 'true') {
+            toastr.success('Post successfully edited!');
+            sessionStorage.removeItem('postEdited');
+        }
+    });
+
+    const commentFocusBtn = document.querySelector('#comment-focus-btn');
+    const commentBox = document.querySelector('#comment-box');
+    commentFocusBtn.addEventListener('click', (e) => {
+        commentBox.scrollIntoView();
+        commentBox.focus();
+    });
+
+    const confirmDeleteBtn = document.querySelector('#confirm-delete-btn');
+    confirmDeleteBtn.addEventListener('click', (e) => {
+        sessionStorage.setItem('postDeleted', 'true');
+    });
+
+    // Edit Modal
+    const showEditModalBtn = document.querySelector('#show-edit-modal-btn');
+    showEditModalBtn.addEventListener('click', (e) => reloadTextArea());
+
+    async function reloadTextArea() {
+        for (let i = 0; i < postTextAreas.length; i++) {
+            await delayAdjust(i);
+        }
+    }
+
+    function delayAdjust(index) {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                postTextAreas[index].style.height = 'auto';
+                postTextAreas[index].style.height = `${postTextAreas[index].scrollHeight}px`;
+            }, 155);
+        });
+    }
+
+    const confirmEditBtn = document.querySelector('#confirm-edit-btn');
+    confirmEditBtn.addEventListener('click', (e) => {
+        sessionStorage.setItem('postEdited', 'true');
+    });
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
