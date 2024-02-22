@@ -1,6 +1,7 @@
 ﻿@page
 @model Tweetr.Pages.Profile.IndexModel
 @{
+    ViewData["Title"] = "My Profile";
 }
 
 <style>
@@ -57,6 +58,7 @@
                 <form asp-page-handler="upload" method="post" enctype="multipart/form-data" asp-route-username="@Model.User.Username">
                     <input type="file" name="files" value="Choose image" class="form-control" />
                     <input type="submit" value="Submit" class="form-control" />
+                    <span class="text-danger">@Model.UploadStatus</span>
                 </form>
             </div>
         }
@@ -100,3 +102,8 @@
         </a>
     }
 </div>
+
+@section Scripts
+{
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Tweetr.Data;
 using Tweetr.Models;
 
@@ -9,8 +10,10 @@ namespace Tweetr.Pages.Profile
     public class IndexModel : PageModel
     {
         public User User { get; set; } = default!;
-        public bool IsAccount { get; set; }
+        public bool IsAccount { get; set; } = false;
         public IList<Post> Posts { get; set; } = default!;
+
+        public string UploadStatus { get; set; } = "";
 
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
@@ -21,23 +24,21 @@ namespace Tweetr.Pages.Profile
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public async Task<IActionResult> OnGetAsync(string? viewedUsername)
+        public async Task<IActionResult> OnGetAsync(string? viewedUsername, string? uploadStatus)
         {
             var sessionUsername = HttpContext.Session.GetString("username");
             var username = viewedUsername;
-            if (username == null)
-            {
-                username = sessionUsername;
-            }
+            username ??= sessionUsername;
 
             if (username == null)
             {
                 return RedirectToPage("/Login/Index");
             }
 
+            var uploadStatusInfo = uploadStatus;
             if (viewedUsername == sessionUsername)
             {
-                return RedirectToPage("Index");
+                return RedirectToPage("Index", new { uploadStatus = uploadStatusInfo });
             }
 
             if (viewedUsername == null)
@@ -52,6 +53,11 @@ namespace Tweetr.Pages.Profile
             }
 
             User = loggedInUser;
+
+            if (uploadStatus != null)
+            {
+                UploadStatus = uploadStatus;
+            }
 
             Posts = await _context.Posts
                     .Where(p => p.Username.Equals(User.Username))
@@ -76,9 +82,9 @@ namespace Tweetr.Pages.Profile
             string webRootPath = _webHostEnvironment.WebRootPath;
             var files = HttpContext.Request.Form.Files;
 
-            if (files.Count == 0)
+            if (files.IsNullOrEmpty() || files.Count == 0)
             {
-                return RedirectToPage("Index", new { viewedUsername = username });
+                return RedirectToPage("Index", new { viewedUsername = username, uploadStatus = "No image provided." });
             }
 
             var profileImageLocation = Path.Combine(webRootPath, @"images/profile");
@@ -87,7 +93,7 @@ namespace Tweetr.Pages.Profile
             string[] imageFileTypes = [".jpeg", ".jfif", ".jpg", ".pjpeg", ".pjp", ".png"];
             if (!imageFileTypes.Contains(extension))
             {
-                return RedirectToPage("Index", new { viewedUsername = username });
+                return RedirectToPage("/Profile/Index", new { viewedUsername = username, uploadStatus = "Valid image file types: jpeg, .jfif, .jpg, .pjpeg, .pjp, .png" });
             }
 
             using (var fileStream = new FileStream(Path.Combine(profileImageLocation, username + extension), FileMode.Create))
