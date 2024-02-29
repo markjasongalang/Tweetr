@@ -66,7 +66,7 @@ namespace Tweetr.Pages.Profile
             return Page();
         }
 
-        public async Task<IActionResult> OnPostUploadAsync(string? username)
+        public async Task<IActionResult> OnPostEditProfileAsync(string? username)
         {
             if (username == null)
             {
@@ -93,7 +93,7 @@ namespace Tweetr.Pages.Profile
             string[] imageFileTypes = [".jpeg", ".jfif", ".jpg", ".pjpeg", ".pjp", ".png"];
             if (!imageFileTypes.Contains(extension))
             {
-                return RedirectToPage("/Profile/Index", new { viewedUsername = username, uploadStatus = "Valid image file types: jpeg, .jfif, .jpg, .pjpeg, .pjp, .png" });
+                return RedirectToPage("Index", new { viewedUsername = username, uploadStatus = "Valid image file types: jpeg, .jfif, .jpg, .pjpeg, .pjp, .png" });
             }
 
             using (var fileStream = new FileStream(Path.Combine(profileImageLocation, username + extension), FileMode.Create))

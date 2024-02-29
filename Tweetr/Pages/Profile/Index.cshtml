@@ -28,7 +28,7 @@
     }
 </style>
 
-<!-- Delete Post Modal -->
+<!-- Edit Profile Modal -->
 <div class="modal fade" id="edit-profile-modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -40,20 +40,28 @@
 
             <!-- Modal Body -->
             <div class="modal-body">
+                <form asp-page-handler="EditProfile" method="post" enctype="multipart/form-data" asp-route-username="@Model.User.Username">
 
-
-
-                <!-- Upload/change profile picture -->
-                @if (Model.IsAccount)
-                {
+                    <!-- Profile Picture -->
                     <div class="mb-3">
-                        <form asp-page-handler="upload" method="post" enctype="multipart/form-data" asp-route-username="@Model.User.Username">
-                            <input type="file" name="files" value="Choose image" class="form-control" />
-                            <input type="submit" value="Submit" class="form-control" />
-                            <span class="text-danger">@Model.UploadStatus</span>
-                        </form>
+                        <label class="form-label">Profile Picture</label>
+                        <input type="file" name="files" value="Choose image" class="form-control" />
+                        <input type="submit" value="Submit" class="form-control" />
+                        <span class="text-danger">@Model.UploadStatus</span>
                     </div>
-                }
+
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" asp-for="@Model.User.Name">
+                    </div>
+
+                    <!-- Bio -->
+                    <div class="mb-3">
+                        <label class="form-label">Bio</label>
+                        <input type="text" class="form-control" asp-for="@Model.User.Bio">
+                    </div>
+                </form>
             </div>
 
             <!-- Modal Footer -->
