@@ -45,7 +45,7 @@
                     <!-- Profile Picture -->
                     <div class="mb-3">
                         <label class="form-label">Profile Picture</label>
-                        <input type="file" name="files" value="Choose image" class="form-control" />
+                        <input type="file" accept="image/*" name="files" value="Choose image" class="form-control" />
                         <input type="submit" value="Submit" class="form-control" />
                         <span class="text-danger">@Model.UploadStatus</span>
                     </div>
@@ -146,6 +146,10 @@
         </a>
     }
 </div>
+
+<script>
+
+</script>
 
 @section Scripts
 {
