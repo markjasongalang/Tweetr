@@ -31,23 +31,27 @@
 <!-- Edit Profile Modal -->
 <div class="modal fade" id="edit-profile-modal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h1 class="modal-title fs-5">Edit profile</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
+        <form asp-page-handler="EditProfile" method="post" enctype="multipart/form-data" asp-route-username="@Model.User.Username">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Edit profile</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
 
-            <!-- Modal Body -->
-            <div class="modal-body">
-                <form asp-page-handler="EditProfile" method="post" enctype="multipart/form-data" asp-route-username="@Model.User.Username">
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <!-- Cover Image -->
+                    <div class="mb-3">
 
-                    <!-- Profile Picture -->
+                    </div>
+
+                    <!-- Profile Image -->
                     <div class="mb-3">
                         <label class="form-label">Profile Picture</label>
-                        <input type="file" accept="image/*" name="files" value="Choose image" class="form-control" />
-                        <input type="submit" value="Submit" class="form-control" />
-                        <span class="text-danger">@Model.UploadStatus</span>
+                        <input type="file" accept=".jpeg, .jpg, .png" asp-for="ProfileImageUpload" value="Choose image" class="form-control" />
+                        @* <span class="text-danger">@Model.UploadStatus</span> *@
+                        <span class="text-danger" asp-validation-for="ProfileImageUpload"></span>
                     </div>
 
                     <!-- Name -->
@@ -61,18 +65,18 @@
                         <label class="form-label">Bio</label>
                         <input type="text" class="form-control" asp-for="@Model.User.Bio">
                     </div>
-                </form>
-            </div>
 
-            <!-- Modal Footer -->
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <!-- TODO: Place notification after update -->
 
-                <form method="post">
-                    <button id="confirm-edit-profile-btn" type="submit" class="btn btn-primary">Save</button>
-                </form>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <input type="submit" value="Save" class="btn btn-primary">
+                </div>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 

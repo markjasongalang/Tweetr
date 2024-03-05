@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Tweetr.Data;
 using Tweetr.Models;
 
@@ -12,6 +11,8 @@ namespace Tweetr.Pages.Profile
         public User User { get; set; } = default!;
         public bool IsAccount { get; set; } = false;
         public IList<Post> Posts { get; set; } = default!;
+        [BindProperty]
+        public IFormFile? ProfileImageUpload { get; set; }
 
         public string UploadStatus { get; set; } = "";
 
@@ -82,43 +83,49 @@ namespace Tweetr.Pages.Profile
             string webRootPath = _webHostEnvironment.WebRootPath;
             var files = HttpContext.Request.Form.Files;
 
-            if (files.IsNullOrEmpty() || files.Count == 0)
+            // Profile Image
+            if (ProfileImageUpload != null)
             {
-                return RedirectToPage("Index", new { viewedUsername = username, uploadStatus = "No image provided." });
-            }
+                string profileImageLocation = Path.Combine(webRootPath, @"images/profile");
+                string extension = Path.GetExtension(ProfileImageUpload.FileName).ToLower();
 
-            var profileImageLocation = Path.Combine(webRootPath, @"images/profile");
-            var extension = Path.GetExtension(files[0].FileName).ToLower();
-
-            string[] imageFileTypes = [".jpeg", ".jfif", ".jpg", ".pjpeg", ".pjp", ".png"];
-            if (!imageFileTypes.Contains(extension))
-            {
-                return RedirectToPage("Index", new { viewedUsername = username, uploadStatus = "Valid image file types: jpeg, .jfif, .jpg, .pjpeg, .pjp, .png" });
-            }
-
-            using (var fileStream = new FileStream(Path.Combine(profileImageLocation, username + extension), FileMode.Create))
-            {
-                files[0].CopyTo(fileStream);
-            }
-
-            user.ProfileImageUrl = @"images/profile/" + username + extension;
-
-            _context.Attach(user).State = EntityState.Modified;
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (! await _context.Users.AnyAsync(u => u.Id == user.Id))
+                string[] imageFileTypes = [".jpeg", ".jpg", ".png"];
+                if (!imageFileTypes.Contains(extension))
                 {
-                    return NotFound();
+                    ModelState.AddModelError("ProfileImageUpload", "Valid image file types: .jpeg, .jpg, .png");
+                    return RedirectToPage("Index", new { viewedUsername = username, uploadStatus = "Valid image file types: .jpeg, .jpg, .png" });
                 }
-                else
+
+                using (var fileStream = new FileStream(Path.Combine(profileImageLocation, username + extension), FileMode.Create))
                 {
-                    throw;
+                    await ProfileImageUpload.CopyToAsync(fileStream);
+                }
+
+                user.ProfileImageUrl = @"images/profile/" + username + extension;
+
+                _context.Attach(user).State = EntityState.Modified;
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (! await _context.Users.AnyAsync(u => u.Id == user.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
             }
+
+            // Cover Image
+
+            // Name
+
+            // Bio
 
             return RedirectToPage("Index", new { viewedUsername = username });
         }
