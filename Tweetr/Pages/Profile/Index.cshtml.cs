@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 using Tweetr.Data;
 using Tweetr.Models;
 
@@ -57,7 +58,12 @@ namespace Tweetr.Pages.Profile
 
             if (uploadStatus != null)
             {
-                UploadStatus = uploadStatus;
+                switch (uploadStatus)
+                {
+                    case "Invalid profile image":
+                        ModelState.AddModelError("ProfileImageUpload", "Valid image file types: .jpeg, .jpg, .png");
+                        break;
+                }
             }
 
             Posts = await _context.Posts
@@ -92,8 +98,7 @@ namespace Tweetr.Pages.Profile
                 string[] imageFileTypes = [".jpeg", ".jpg", ".png"];
                 if (!imageFileTypes.Contains(extension))
                 {
-                    ModelState.AddModelError("ProfileImageUpload", "Valid image file types: .jpeg, .jpg, .png");
-                    return RedirectToPage("Index", new { viewedUsername = username, uploadStatus = "Valid image file types: .jpeg, .jpg, .png" });
+                    return RedirectToPage("Index", new { viewedUsername = username, uploadStatus = "Invalid profile image" });
                 }
 
                 using (var fileStream = new FileStream(Path.Combine(profileImageLocation, username + extension), FileMode.Create))

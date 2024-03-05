@@ -31,6 +31,8 @@
 <!-- Edit Profile Modal -->
 <div class="modal fade" id="edit-profile-modal" tabindex="-1">
     <div class="modal-dialog">
+
+        <!-- Start of Form -->
         <form asp-page-handler="EditProfile" method="post" enctype="multipart/form-data" asp-route-username="@Model.User.Username">
             <div class="modal-content">
                 <!-- Modal Header -->
@@ -50,7 +52,6 @@
                     <div class="mb-3">
                         <label class="form-label">Profile Picture</label>
                         <input type="file" accept=".jpeg, .jpg, .png" asp-for="ProfileImageUpload" value="Choose image" class="form-control" />
-                        @* <span class="text-danger">@Model.UploadStatus</span> *@
                         <span class="text-danger" asp-validation-for="ProfileImageUpload"></span>
                     </div>
 
@@ -77,6 +78,8 @@
                 </div>
             </div>
         </form>
+        <!-- End of Form -->
+
     </div>
 </div>
 
