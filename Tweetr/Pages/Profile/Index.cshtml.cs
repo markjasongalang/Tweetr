@@ -1,7 +1,8 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Net.Http.Headers;
+using System.Net.Http;
 using Tweetr.Data;
 using Tweetr.Models;
 
@@ -9,14 +10,16 @@ namespace Tweetr.Pages.Profile
 {
     public class IndexModel : PageModel
     {
+        // Public properties
         public User User { get; set; } = default!;
         public bool IsAccount { get; set; } = false;
         public IList<Post> Posts { get; set; } = default!;
         [BindProperty]
+        public IFormFile? CoverImageUpload { get; set; }
+        [BindProperty]
         public IFormFile? ProfileImageUpload { get; set; }
 
-        public string UploadStatus { get; set; } = "";
-
+        // Private fields
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
 
@@ -26,7 +29,7 @@ namespace Tweetr.Pages.Profile
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public async Task<IActionResult> OnGetAsync(string? viewedUsername, string? uploadStatus)
+        public async Task<IActionResult> OnGetAsync(string? viewedUsername)
         {
             var sessionUsername = HttpContext.Session.GetString("username");
             var username = viewedUsername;
@@ -37,10 +40,9 @@ namespace Tweetr.Pages.Profile
                 return RedirectToPage("/Login/Index");
             }
 
-            var uploadStatusInfo = uploadStatus;
             if (viewedUsername == sessionUsername)
             {
-                return RedirectToPage("Index", new { uploadStatus = uploadStatusInfo });
+                return RedirectToPage("Index");
             }
 
             if (viewedUsername == null)
@@ -56,15 +58,17 @@ namespace Tweetr.Pages.Profile
 
             User = loggedInUser;
 
-            if (uploadStatus != null)
+            if (HttpContext.Session.GetString("hasCoverImageError") != null)
             {
-                switch (uploadStatus)
-                {
-                    case "Invalid profile image":
-                        ModelState.AddModelError("ProfileImageUpload", "Valid image file types: .jpeg, .jpg, .png");
-                        break;
-                }
+                ModelState.AddModelError("CoverImageUpload", "Valid image file types: .jpeg, .jpg, .png");
+                HttpContext.Session.Remove("hasCoverImageError");
             }
+            if (HttpContext.Session.GetString("hasProfileImageError") != null)
+            {
+                ModelState.AddModelError("ProfileImageUpload", "Valid image file types: .jpeg, .jpg, .png");
+                HttpContext.Session.Remove("hasProfileImageError");
+            }
+            // Other errors here
 
             Posts = await _context.Posts
                     .Where(p => p.Username.Equals(User.Username))
@@ -89,46 +93,84 @@ namespace Tweetr.Pages.Profile
             string webRootPath = _webHostEnvironment.WebRootPath;
             var files = HttpContext.Request.Form.Files;
 
+            string[] imageFileTypes = [".jpeg", ".jpg", ".png"];
+
+            // Cover Image
+            if (CoverImageUpload != null)
+            {
+                string coverImageLocation = Path.Combine(webRootPath, @"images/cover");
+                string extension = Path.GetExtension(CoverImageUpload.FileName).ToLower();
+
+                if (!imageFileTypes.Contains(extension))
+                {
+                    HttpContext.Session.SetString("hasCoverImageError", "true");
+                }
+
+                if (HttpContext.Session.GetString("hasCoverImageError") == null)
+                {
+                    using FileStream fileStream = new(Path.Combine(coverImageLocation, username + extension), FileMode.Create);
+                    await CoverImageUpload.CopyToAsync(fileStream);
+
+                    user.CoverImageUrl = @"images/cover/" + username + extension;
+
+                    _context.Attach(user).State = EntityState.Modified;
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateConcurrencyException)
+                    {
+                        if (!await _context.Users.AnyAsync(u => u.Id == user.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
+                    }
+                }
+            }
+
             // Profile Image
             if (ProfileImageUpload != null)
             {
                 string profileImageLocation = Path.Combine(webRootPath, @"images/profile");
                 string extension = Path.GetExtension(ProfileImageUpload.FileName).ToLower();
 
-                string[] imageFileTypes = [".jpeg", ".jpg", ".png"];
                 if (!imageFileTypes.Contains(extension))
                 {
-                    return RedirectToPage("Index", new { viewedUsername = username, uploadStatus = "Invalid profile image" });
+                    HttpContext.Session.SetString("hasProfileImageError", "true");
                 }
 
-                using (var fileStream = new FileStream(Path.Combine(profileImageLocation, username + extension), FileMode.Create))
+                if (HttpContext.Session.GetString("hasProfileImageError") == null)
                 {
+                    using FileStream fileStream = new(Path.Combine(profileImageLocation, username + extension), FileMode.Create);
                     await ProfileImageUpload.CopyToAsync(fileStream);
-                }
 
-                user.ProfileImageUrl = @"images/profile/" + username + extension;
+                    user.ProfileImageUrl = @"images/profile/" + username + extension;
 
-                _context.Attach(user).State = EntityState.Modified;
-                try
-                {
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (! await _context.Users.AnyAsync(u => u.Id == user.Id))
+                    _context.Attach(user).State = EntityState.Modified;
+                    try
                     {
-                        return NotFound();
+                        await _context.SaveChangesAsync();
                     }
-                    else
+                    catch (DbUpdateConcurrencyException)
                     {
-                        throw;
+                        if (!await _context.Users.AnyAsync(u => u.Id == user.Id))
+                        {
+                            return NotFound();
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
             }
 
-            // Cover Image
-
             // Name
+
 
             // Bio
 
@@ -140,5 +182,11 @@ namespace Tweetr.Pages.Profile
             HttpContext.Session.Clear();
             return RedirectToPage("/Login/Index");
         }
+    }
+
+    public class EditProfileErrors
+    {
+        public bool HasCoverImageError { get; set; } = false;
+        public bool HasProfileImageError { get; set; } = false;
     }
 }

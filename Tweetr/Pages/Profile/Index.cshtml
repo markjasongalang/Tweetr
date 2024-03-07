@@ -15,6 +15,11 @@
     .cover-image {
         width: inherit;
         height: 200px;
+    }
+
+    .cover-image img {
+        width: inherit;
+        height: inherit;
         object-fit: cover;
     }
 
@@ -45,12 +50,14 @@
                 <div class="modal-body">
                     <!-- Cover Image -->
                     <div class="mb-3">
-
+                        <label class="form-label">Cover Image</label>
+                        <input type="file" accept=".jpeg, .jpg, .png" asp-for="CoverImageUpload" value="Choose image" class="form-control" />
+                        <span class="text-danger" asp-validation-for="CoverImageUpload"></span>
                     </div>
 
                     <!-- Profile Image -->
                     <div class="mb-3">
-                        <label class="form-label">Profile Picture</label>
+                        <label class="form-label">Profile Image</label>
                         <input type="file" accept=".jpeg, .jpg, .png" asp-for="ProfileImageUpload" value="Choose image" class="form-control" />
                         <span class="text-danger" asp-validation-for="ProfileImageUpload"></span>
                     </div>
@@ -86,7 +93,12 @@
 <div class="container">
     <div class="upper mb-3">
         <!-- Cover Image -->
-        <div class="bg-secondary cover-image"></div>
+        <div class="bg-secondary cover-image">
+            @if (!string.IsNullOrEmpty(Model.User.CoverImageUrl))
+            {
+                <img src="@Model.User.CoverImageUrl" />
+            }
+        </div>
 
         <!-- Profile Info -->
         <div class="d-flex justify-content-between">
