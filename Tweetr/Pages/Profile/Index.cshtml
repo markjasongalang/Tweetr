@@ -65,13 +65,15 @@
                     <!-- Name -->
                     <div class="mb-3">
                         <label class="form-label">Name</label>
-                        <input type="text" class="form-control" asp-for="@Model.User.Name">
+                        <input type="text" class="form-control" asp-for="@Model.Name">
+                        <span class="text-danger" asp-validation-for="Name"></span>
                     </div>
 
                     <!-- Bio -->
                     <div class="mb-3">
                         <label class="form-label">Bio</label>
-                        <input type="text" class="form-control" asp-for="@Model.User.Bio">
+                        <input type="text" class="form-control" asp-for="@Model.Bio">
+                        <span class="text-danger" asp-validation-for="Bio"></span>
                     </div>
 
                     <!-- TODO: Place notification after update -->

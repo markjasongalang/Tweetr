@@ -1,8 +1,6 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
 using Tweetr.Data;
 using Tweetr.Models;
 
@@ -18,6 +16,10 @@ namespace Tweetr.Pages.Profile
         public IFormFile? CoverImageUpload { get; set; }
         [BindProperty]
         public IFormFile? ProfileImageUpload { get; set; }
+        [BindProperty]
+        public string? Name { get; set; }
+        [BindProperty]
+        public string? Bio { get; set; }
 
         // Private fields
         private readonly ApplicationDbContext _context;
@@ -57,6 +59,8 @@ namespace Tweetr.Pages.Profile
             }
 
             User = loggedInUser;
+            Name = User.Name;
+            Bio = User.Bio;
 
             if (HttpContext.Session.GetString("hasCoverImageError") != null)
             {
@@ -170,9 +174,13 @@ namespace Tweetr.Pages.Profile
             }
 
             // Name
+            if (Name != null)
+            {
 
+            }
 
             // Bio
+            // -> ok even if null or empty
 
             return RedirectToPage("Index", new { viewedUsername = username });
         }
@@ -182,11 +190,5 @@ namespace Tweetr.Pages.Profile
             HttpContext.Session.Clear();
             return RedirectToPage("/Login/Index");
         }
-    }
-
-    public class EditProfileErrors
-    {
-        public bool HasCoverImageError { get; set; } = false;
-        public bool HasProfileImageError { get; set; } = false;
     }
 }
