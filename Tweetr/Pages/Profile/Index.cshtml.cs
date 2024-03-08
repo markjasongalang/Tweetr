@@ -208,13 +208,52 @@ namespace Tweetr.Pages.Profile
                 }
                 await _context.SaveChangesAsync();
             }
-            else
+            else if (string.IsNullOrEmpty(Name))
             {
                 HttpContext.Session.SetString("hasNameError", "true");
             }
 
             // Bio
-            // -> ok even if null or empty
+            if (Bio != null && !Bio.Equals(user.Bio))
+            {
+                user.Bio = Bio;
+                _context.Attach(user).State = EntityState.Modified;
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await _context.Users.AnyAsync(u => u.Id == user.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+            else if (Bio == null)
+            {
+                user.Bio = null;
+                _context.Attach(user).State = EntityState.Modified;
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await _context.Users.AnyAsync(u => u.Id == user.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
 
             return RedirectToPage("Index", new { viewedUsername = username });
         }

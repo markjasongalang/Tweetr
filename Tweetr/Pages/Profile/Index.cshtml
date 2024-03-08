@@ -132,8 +132,10 @@
             <h5>@Model.User.Name</h5>
             <p class="text-secondary">&#64;@Model.User.Username</p>
 
-            <!-- TODO: Add bio editing -->
-            <p>Bio</p>
+            @if (!string.IsNullOrEmpty(Model.Bio))
+            {
+                <p>@Model.Bio</p>
+            }
 
             <p class="text-secondary"><i class="bi bi-calendar-week"></i> Joined @Html.DisplayFor(model => model.User.DateJoined)</p>
 
