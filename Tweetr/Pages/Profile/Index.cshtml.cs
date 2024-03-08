@@ -72,6 +72,11 @@ namespace Tweetr.Pages.Profile
                 ModelState.AddModelError("ProfileImageUpload", "Valid image file types: .jpeg, .jpg, .png");
                 HttpContext.Session.Remove("hasProfileImageError");
             }
+            if (HttpContext.Session.GetString("hasNameError") != null)
+            {
+                ModelState.AddModelError("Name", "Name cannot be empty");
+                HttpContext.Session.Remove("hasNameError");
+            }
             // Other errors here
 
             Posts = await _context.Posts
@@ -174,9 +179,38 @@ namespace Tweetr.Pages.Profile
             }
 
             // Name
-            if (Name != null)
+            if (Name != null && !Name.Equals(user.Name))
             {
+                user.Name = Name;
+                _context.Attach(user).State = EntityState.Modified;
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await _context.Users.AnyAsync(u => u.Id == user.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
 
+                // Update name of owned posts
+                var ownedPosts = await _context.Posts.Where(p => p.Username == user.Username).ToListAsync();
+                foreach (var post in ownedPosts)
+                {
+                    post.Name = user.Name;
+                    _context.Attach(post).State = EntityState.Modified;
+                }
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                HttpContext.Session.SetString("hasNameError", "true");
             }
 
             // Bio
