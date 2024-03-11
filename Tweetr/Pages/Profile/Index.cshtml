@@ -72,12 +72,9 @@
                     <!-- Bio -->
                     <div class="mb-3">
                         <label class="form-label">Bio</label>
-                        <input type="text" class="form-control" asp-for="@Model.Bio">
+                        <textarea rows="3" class="form-control" asp-for="@Model.Bio"></textarea>
                         <span class="text-danger" asp-validation-for="Bio"></span>
                     </div>
-
-                    <!-- TODO: Place notification after update -->
-
                 </div>
 
                 <!-- Modal Footer -->
@@ -134,7 +131,7 @@
 
             @if (!string.IsNullOrEmpty(Model.Bio))
             {
-                <p>@Model.Bio</p>
+                <p style="white-space: pre-wrap;">@Model.Bio</p>
             }
 
             <p class="text-secondary"><i class="bi bi-calendar-week"></i> Joined @Html.DisplayFor(model => model.User.DateJoined)</p>
