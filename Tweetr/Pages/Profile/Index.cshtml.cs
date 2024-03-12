@@ -20,6 +20,7 @@ namespace Tweetr.Pages.Profile
         public string? Name { get; set; }
         [BindProperty]
         public string? Bio { get; set; }
+        public string EditProfileStatus { get; set; } = "default";
 
         // Private fields
         private readonly ApplicationDbContext _context;
@@ -62,22 +63,30 @@ namespace Tweetr.Pages.Profile
             Name = User.Name;
             Bio = User.Bio;
 
+            if (HttpContext.Session.GetString("editProfileSuccess") != null)
+            {
+                HttpContext.Session.Remove("editProfileSuccess");
+                EditProfileStatus = "success";
+            }
+
             if (HttpContext.Session.GetString("hasCoverImageError") != null)
             {
                 ModelState.AddModelError("CoverImageUpload", "Valid image file types: .jpeg, .jpg, .png");
                 HttpContext.Session.Remove("hasCoverImageError");
+                EditProfileStatus = "error";
             }
             if (HttpContext.Session.GetString("hasProfileImageError") != null)
             {
                 ModelState.AddModelError("ProfileImageUpload", "Valid image file types: .jpeg, .jpg, .png");
                 HttpContext.Session.Remove("hasProfileImageError");
+                EditProfileStatus = "error";
             }
             if (HttpContext.Session.GetString("hasNameError") != null)
             {
                 ModelState.AddModelError("Name", "Name cannot be empty");
                 HttpContext.Session.Remove("hasNameError");
+                EditProfileStatus = "error";
             }
-            // Other errors here
 
             Posts = await _context.Posts
                     .Where(p => p.Username.Equals(User.Username))
@@ -104,6 +113,8 @@ namespace Tweetr.Pages.Profile
 
             string[] imageFileTypes = [".jpeg", ".jpg", ".png"];
 
+            bool editSuccess = true;
+
             // Cover Image
             if (CoverImageUpload != null)
             {
@@ -113,6 +124,7 @@ namespace Tweetr.Pages.Profile
                 if (!imageFileTypes.Contains(extension))
                 {
                     HttpContext.Session.SetString("hasCoverImageError", "true");
+                    editSuccess = false;
                 }
 
                 if (HttpContext.Session.GetString("hasCoverImageError") == null)
@@ -150,6 +162,7 @@ namespace Tweetr.Pages.Profile
                 if (!imageFileTypes.Contains(extension))
                 {
                     HttpContext.Session.SetString("hasProfileImageError", "true");
+                    editSuccess = false;
                 }
 
                 if (HttpContext.Session.GetString("hasProfileImageError") == null)
@@ -211,6 +224,7 @@ namespace Tweetr.Pages.Profile
             else if (string.IsNullOrEmpty(Name))
             {
                 HttpContext.Session.SetString("hasNameError", "true");
+                editSuccess = false;
             }
 
             // Bio
@@ -253,6 +267,11 @@ namespace Tweetr.Pages.Profile
                         throw;
                     }
                 }
+            }
+
+            if (editSuccess)
+            {
+                HttpContext.Session.SetString("editProfileSuccess", "true");
             }
 
             return RedirectToPage("Index", new { viewedUsername = username });

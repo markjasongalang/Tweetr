@@ -170,6 +170,26 @@
 
 <script>
 
+    document.addEventListener('DOMContentLoaded', (e) => {
+        // Check if profile has been edited successfully
+        @if (Model.EditProfileStatus.Equals("success"))
+        {
+            <text>
+                toastr.success("Profile successfully edited!");
+            </text>
+        }
+        else if (Model.EditProfileStatus.Equals("error"))
+        {
+            <text>
+                const editProfileModal = new bootstrap.Modal(document.querySelector('#edit-profile-modal'), {
+                    keyboard: false
+                });
+                editProfileModal.show();
+            </text>
+        }
+    });
+
+
 </script>
 
 @section Scripts
