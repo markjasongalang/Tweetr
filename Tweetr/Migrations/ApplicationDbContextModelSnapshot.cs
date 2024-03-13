@@ -122,6 +122,9 @@ namespace Tweetr.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProfileImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("TotalComments")
                         .HasColumnType("int");
 

@@ -54,6 +54,7 @@ namespace Tweetr.Pages.Posts
             Post.TotalLikes = 0;
             Post.TotalComments = 0;
             Post.TotalReposts = 0;
+            Post.ProfileImageUrl = loggedInUser.ProfileImageUrl;
 
             _context.Posts.Add(Post);
             await _context.SaveChangesAsync();
