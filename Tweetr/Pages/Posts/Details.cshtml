@@ -150,6 +150,7 @@
         <div class="mb-3">
             <p>
                 <a style="color: inherit; text-decoration: none;" asp-page="/Profile/Index" asp-route-viewedUsername="@comment.Username">
+                    <img src="~/@Html.DisplayFor(modelItem => comment.ProfileImageUrl)" alt="profile-image" class="post-profile-image" />&nbsp;
                     <strong>@comment.Name</strong>&nbsp;<span class="text-secondary">&#64;@comment.Username &#183; @Html.DisplayFor(modelItem => comment.DatePosted)</span>
                 </a>
             </p>

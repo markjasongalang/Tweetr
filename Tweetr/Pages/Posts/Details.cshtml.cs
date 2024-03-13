@@ -119,7 +119,8 @@ namespace Tweetr.Pages.Posts
                     Username = user.Username,
                     Content = Comment,
                     DatePosted = DateTime.UtcNow,
-                    PostId = post.Id
+                    PostId = post.Id,
+                    ProfileImageUrl = user.ProfileImageUrl
                 };
 
                 _context.Comments.Add(comment);
