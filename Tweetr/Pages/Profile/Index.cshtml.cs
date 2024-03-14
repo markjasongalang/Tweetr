@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using Tweetr.Data;
 using Tweetr.Models;
 
@@ -188,6 +189,24 @@ namespace Tweetr.Pages.Profile
                             throw;
                         }
                     }
+
+                    // Update profile picture in posts
+                    var posts = await _context.Posts.Where(p => p.Username.Equals(user.Username)).ToListAsync();
+                    foreach (var post in posts)
+                    {
+                        post.ProfileImageUrl = user.ProfileImageUrl;
+                        _context.Attach(post).State = EntityState.Modified;
+                    }
+
+                    // Update profile picture in comments
+                    var comments = await _context.Comments.Where(c => c.Username.Equals(user.Username)).ToListAsync();
+                    foreach (var comment in comments)
+                    {
+                        comment.ProfileImageUrl = comment.ProfileImageUrl;
+                        _context.Attach(comment).State = EntityState.Modified;
+                    }
+
+                    await _context.SaveChangesAsync();
                 }
             }
 
