@@ -51,7 +51,12 @@
                     <!-- Cover Image -->
                     <div class="mb-3">
                         <label class="form-label">Cover Image</label>
-                        <input type="file" accept=".jpeg, .jpg, .png" asp-for="CoverImageUpload" value="Choose image" class="form-control" />
+                        <input type="file" accept=".jpeg, .jpg, .png" asp-for="CoverImageUpload" value="Choose image" class="form-control" id="cover-image-file" />
+                        @if (!string.IsNullOrEmpty(Model.User.CoverImageUrl))
+                        {
+                            <input class="form-check-input" type="checkbox" asp-for="RemoveCoverImage" id="remove-cover-image-cb">
+                            <label class="form-check-label" for="remove-cover-image-cb">Remove cover image</label>
+                        }
                         <span class="text-danger" asp-validation-for="CoverImageUpload"></span>
                     </div>
 
@@ -170,6 +175,7 @@
 </div>
 
 <script>
+    const removeCoverImageCb = document.querySelector('#remove-cover-image-cb');
 
     document.addEventListener('DOMContentLoaded', (e) => {
         // Check if profile has been edited successfully
@@ -190,7 +196,13 @@
         }
     });
 
-
+    removeCoverImageCb.addEventListener('click', (e) => {
+        const coverImageFile = document.querySelector('#cover-image-file');
+        if (coverImageFile.value != null) {
+            coverImageFile.value = null;
+        }
+        coverImageFile.disabled = !coverImageFile.disabled;
+    });
 </script>
 
 @section Scripts

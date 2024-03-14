@@ -22,6 +22,8 @@ namespace Tweetr.Pages.Profile
         [BindProperty]
         public string? Bio { get; set; }
         public string EditProfileStatus { get; set; } = "default";
+        [BindProperty]
+        public bool RemoveCoverImage { get; set; } = false;
 
         // Private fields
         private readonly ApplicationDbContext _context;
@@ -117,7 +119,21 @@ namespace Tweetr.Pages.Profile
             bool editSuccess = true;
 
             // Cover Image
-            if (CoverImageUpload != null)
+            if (RemoveCoverImage && user.CoverImageUrl != null)
+            {
+                // Remove file from wwwroot
+                string coverImageFilePath = Path.Combine(webRootPath, user.CoverImageUrl);
+                if (System.IO.File.Exists(coverImageFilePath))
+                {
+                    System.IO.File.Delete(coverImageFilePath);
+                }
+
+                // Remove path in database
+                user.CoverImageUrl = null;
+                _context.Attach(user).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+            else if (CoverImageUpload != null)
             {
                 string coverImageLocation = Path.Combine(webRootPath, @"images/cover");
                 string extension = Path.GetExtension(CoverImageUpload.FileName).ToLower();
