@@ -24,6 +24,8 @@ namespace Tweetr.Pages.Profile
         public string EditProfileStatus { get; set; } = "default";
         [BindProperty]
         public bool RemoveCoverImage { get; set; } = false;
+        [BindProperty]
+        public bool RemoveProfileImage { get; set; } = false;
 
         // Private fields
         private readonly ApplicationDbContext _context;
@@ -171,7 +173,24 @@ namespace Tweetr.Pages.Profile
             }
 
             // Profile Image
-            if (ProfileImageUpload != null)
+            bool profilePictureUpdated = false;
+            if (RemoveProfileImage && user.ProfileImageUrl != null)
+            {
+                // Remove file from wwwroot
+                string profileImageFilePath = Path.Combine(webRootPath, user.ProfileImageUrl);
+                if (System.IO.File.Exists(profileImageFilePath))
+                {
+                    System.IO.File.Delete(profileImageFilePath);
+                }
+
+                // Set default profile image path in database
+                user.ProfileImageUrl = @"images/profile/default_profile_image.jpg";
+                _context.Attach(user).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+
+                profilePictureUpdated = true;
+            }
+            else if (ProfileImageUpload != null)
             {
                 string profileImageLocation = Path.Combine(webRootPath, @"images/profile");
                 string extension = Path.GetExtension(ProfileImageUpload.FileName).ToLower();
@@ -206,24 +225,29 @@ namespace Tweetr.Pages.Profile
                         }
                     }
 
-                    // Update profile picture in posts
-                    var posts = await _context.Posts.Where(p => p.Username.Equals(user.Username)).ToListAsync();
-                    foreach (var post in posts)
-                    {
-                        post.ProfileImageUrl = user.ProfileImageUrl;
-                        _context.Attach(post).State = EntityState.Modified;
-                    }
-
-                    // Update profile picture in comments
-                    var comments = await _context.Comments.Where(c => c.Username.Equals(user.Username)).ToListAsync();
-                    foreach (var comment in comments)
-                    {
-                        comment.ProfileImageUrl = comment.ProfileImageUrl;
-                        _context.Attach(comment).State = EntityState.Modified;
-                    }
-
-                    await _context.SaveChangesAsync();
+                    profilePictureUpdated = true;
                 }
+            }
+
+            if (profilePictureUpdated)
+            {
+                // Update profile picture in posts
+                var posts = await _context.Posts.Where(p => p.Username.Equals(user.Username)).ToListAsync();
+                foreach (var post in posts)
+                {
+                    post.ProfileImageUrl = user.ProfileImageUrl;
+                    _context.Attach(post).State = EntityState.Modified;
+                }
+
+                // Update profile picture in comments
+                var comments = await _context.Comments.Where(c => c.Username.Equals(user.Username)).ToListAsync();
+                foreach (var comment in comments)
+                {
+                    comment.ProfileImageUrl = user.ProfileImageUrl;
+                    _context.Attach(comment).State = EntityState.Modified;
+                }
+
+                await _context.SaveChangesAsync();
             }
 
             // Name

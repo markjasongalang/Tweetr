@@ -63,7 +63,12 @@
                     <!-- Profile Image -->
                     <div class="mb-3">
                         <label class="form-label">Profile Image</label>
-                        <input type="file" accept=".jpeg, .jpg, .png" asp-for="ProfileImageUpload" value="Choose image" class="form-control" />
+                        <input type="file" accept=".jpeg, .jpg, .png" asp-for="ProfileImageUpload" value="Choose image" class="form-control" id="profile-image-file" />
+                        @if (!string.IsNullOrEmpty(Model.User.ProfileImageUrl) && !Model.User.ProfileImageUrl.Equals(@"images/profile/default_profile_image.jpg"))
+                        {
+                            <input class="form-check-input" type="checkbox" asp-for="RemoveProfileImage" id="remove-profile-image-cb">
+                            <label class="form-check-label" for="remove-profile-image-cb">Remove profile image</label>
+                        }
                         <span class="text-danger" asp-validation-for="ProfileImageUpload"></span>
                     </div>
 
@@ -175,9 +180,9 @@
 </div>
 
 <script>
-    const removeCoverImageCb = document.querySelector('#remove-cover-image-cb');
-
+    // When the page loads:
     document.addEventListener('DOMContentLoaded', (e) => {
+
         // Check if profile has been edited successfully
         @if (Model.EditProfileStatus.Equals("success"))
         {
@@ -194,7 +199,18 @@
                 editProfileModal.show();
             </text>
         }
+
+        // Disable remove profile image option for default profile image
+        @if (Model.User.ProfileImageUrl != null && Model.User.ProfileImageUrl.Equals(@"images/profile/default_profile_image.jpg"))
+        {
+            <text>
+                removeProfileImageCb.disabled = true;
+            </text>
+        }
     });
+
+    const removeCoverImageCb = document.querySelector('#remove-cover-image-cb');
+    const removeProfileImageCb = document.querySelector('#remove-profile-image-cb');
 
     removeCoverImageCb.addEventListener('click', (e) => {
         const coverImageFile = document.querySelector('#cover-image-file');
@@ -202,6 +218,14 @@
             coverImageFile.value = null;
         }
         coverImageFile.disabled = !coverImageFile.disabled;
+    });
+
+    removeProfileImageCb.addEventListener('click', (e) => {
+        const profileImageFile = document.querySelector('#profile-image-file');
+        if (profileImageFile.value != null) {
+            profileImageFile.value = null;
+        }
+        profileImageFile.disabled = !profileImageFile.disabled;
     });
 </script>
 
