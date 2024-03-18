@@ -61,10 +61,10 @@ namespace Tweetr.Pages.Signup
                 return Page();
             }
 
-            // Hash password
+            // TODO: Hash password
 
-
-            // TODO: Set default profile image and cover image
+            User.ProfileImageUrl = @"images/profile/default_profile_image.jpg";
+            User.CoverImageUrl = null;
 
             _context.Users.Add(User);
             await _context.SaveChangesAsync();
