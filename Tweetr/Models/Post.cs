@@ -26,6 +26,8 @@ namespace Tweetr.Models
 
         public string? ProfileImageUrl { get; set; }
 
+        public string? RepostedBy { get; set; }
+
         #region ICloneable Members
         public object Clone()
         {
