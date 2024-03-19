@@ -25,7 +25,10 @@ namespace Tweetr.Pages.Posts
         public async Task OnGetAsync()
         {
             IsLoggedIn = HttpContext.Session.GetString("username") != null;
-            Posts = await _context.Posts.OrderByDescending(p => p.DatePosted).ToListAsync();
+            Posts = await _context.Posts
+                .OrderByDescending(p => p.DatePosted)
+                .ThenByDescending(p => p.DateReposted)
+                .ToListAsync();
         }
 
         public async Task<IActionResult> OnPostCreateAsync()

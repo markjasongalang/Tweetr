@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Tweetr.Data;
@@ -60,7 +61,7 @@ namespace Tweetr.Pages.Posts
 
                 if (username != null)
                 {
-                    if (username.Equals(Post.Username))
+                    if (username.Equals(Post.Username) || username.Equals(Post.RepostedBy))
                     {
                         IsOwnPost = true;
                     }
@@ -340,8 +341,52 @@ namespace Tweetr.Pages.Posts
             return RedirectToPage("Details", new { id = Post.Id });
         }
 
-        // TODO: Repost
+        public async Task<IActionResult> OnPostRepostAsync(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
 
+            var username = HttpContext.Session.GetString("username")?.ToString();
+            if (username == null)
+            {
+                return RedirectToPage("/Login/Index");
+            }
+
+            var originalPost = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id);
+            if (originalPost == null)
+            {
+                return NotFound();
+            }
+
+            originalPost.TotalReposts += 1;
+            _context.Posts.Attach(originalPost).State = EntityState.Modified;
+
+            var postCopy = new Post
+            {
+                Name = originalPost.Name,
+                Username = originalPost.Username,
+                DatePosted = originalPost.DatePosted,
+                DateEdited = originalPost.DateEdited,
+                Content = originalPost.Content,
+                TotalLikes = originalPost.TotalLikes,
+                TotalComments = originalPost.TotalComments,
+                TotalReposts = originalPost.TotalReposts,
+                ProfileImageUrl = originalPost.ProfileImageUrl,
+                RepostedBy = username,
+                DateReposted = DateTime.UtcNow
+            };
+
+            // TODO: Handle original post id
+
+            _context.Posts.Add(postCopy);
+            await _context.SaveChangesAsync();
+
+            // TODO: Place notification (client side)
+
+            return RedirectToPage("/Posts/Index");
+        }
 
         #endregion
 

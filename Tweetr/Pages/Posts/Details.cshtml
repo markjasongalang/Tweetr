@@ -68,6 +68,11 @@
 <div class="container">
     <div class="d-flex justify-content-between">
         <div>
+            @if (!string.IsNullOrEmpty(Model.Post.RepostedBy))
+            {
+                <p class="text-primary"><i class="bi bi-send"></i> Reposted by &#64;<strong>@Model.Post.RepostedBy</strong></p>
+            }
+
             <a style="color: inherit; text-decoration: none;" asp-page="/Profile/Index" asp-route-viewedUsername="@Model.Post.Username">
                 <div class="d-flex gap-1">
                     <div>
@@ -106,7 +111,7 @@
     </p>
 
     <div class="d-flex gap-2">
-        <form method="post" >
+        <form method="post">
             <!-- Like/Unlike -->
             @if (!Model.IsLiked)
             {
@@ -121,7 +126,7 @@
             <span id="comment-focus-btn" class="btn btn-outline-primary"><i class="bi bi-chat"></i>&nbsp;@Model.Post.TotalComments</span>
 
             <!-- Repost -->
-            <button asp-page-handler="" asp-route-id="@Model.Post.Id" type="submit" class="btn btn-outline-primary"><i class="bi bi-send"></i>&nbsp;0</button>
+            <button asp-page-handler="Repost" asp-route-id="@Model.Post.Id" type="submit" class="btn btn-outline-primary"><i class="bi bi-send"></i>&nbsp;0</button>
         </form>
     </div>
 </div>

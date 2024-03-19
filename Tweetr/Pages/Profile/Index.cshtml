@@ -161,6 +161,11 @@
         <a style="color: inherit; text-decoration: none;" asp-page="/Posts/Details" asp-route-id="@item.Id">
             <div class="card mb-3">
                 <div class="card-body">
+                    @if (!string.IsNullOrEmpty(item.RepostedBy))
+                    {
+                        <p class="text-primary"><i class="bi bi-send"></i> Reposted by &#64;<strong>@item.RepostedBy</strong></p>
+                    }
+
                     <p>
                         <img src="~/@Html.DisplayFor(modelItem => item.ProfileImageUrl)" alt="profile-image" class="post-profile-image" />&nbsp;
                         <strong>@Html.DisplayFor(modelItem => item.Name)</strong> <span class="text-secondary">&#64;@Html.DisplayFor(modelItem => item.Username) &#183; @Html.DisplayFor(modelItem => item.DatePosted)</span>
