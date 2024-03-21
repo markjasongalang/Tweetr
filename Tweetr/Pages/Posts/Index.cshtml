@@ -42,7 +42,7 @@
 
 @foreach (var item in Model.Posts)
 {
-    <a style="color: inherit; text-decoration: none;" asp-page="./Details" asp-route-id="@item.Id">
+    <a style="color: inherit; text-decoration: none;" asp-page="./Details" asp-route-id="@(item.OriginalPostId == null ? item.Id : item.OriginalPostId)">
         <div class="card mb-3">
 
             <div class="card-body">

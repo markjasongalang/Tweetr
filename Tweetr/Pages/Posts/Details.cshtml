@@ -126,7 +126,14 @@
             <span id="comment-focus-btn" class="btn btn-outline-primary"><i class="bi bi-chat"></i>&nbsp;@Model.Post.TotalComments</span>
 
             <!-- Repost -->
-            <button asp-page-handler="Repost" asp-route-id="@Model.Post.Id" type="submit" class="btn btn-outline-primary"><i class="bi bi-send"></i>&nbsp;0</button>
+            @if (Model.AlreadyReposted)
+            {
+                <button disabled class="btn btn-outline-primary"><i class="bi bi-send-fill"></i>&nbsp;@Model.Post.TotalReposts</button>
+            }
+            else
+            {
+                <button asp-page-handler="Repost" asp-route-id="@Model.Post.Id" type="submit" class="btn btn-outline-primary"><i class="bi bi-send"></i>&nbsp;@Model.Post.TotalReposts</button>
+            }
         </form>
     </div>
 </div>

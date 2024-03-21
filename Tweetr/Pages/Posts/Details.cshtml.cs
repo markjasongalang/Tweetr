@@ -9,6 +9,7 @@ namespace Tweetr.Pages.Posts
 {
     public class DetailsModel : PageModel
     {
+        // Public properties
         public Post Post { get; set; } = default!; // Use only in OnGet()
 
         [BindProperty]
@@ -22,13 +23,11 @@ namespace Tweetr.Pages.Posts
         public bool IsOwnPost { get; set; } = false;
 
         public bool IsLiked { get; set; } = false;
+        public bool AlreadyReposted { get; set; } = false;
 
+        // Private properties
         private readonly ApplicationDbContext _context;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="context"></param>
         public DetailsModel(ApplicationDbContext context)
         {
             _context = context;
@@ -42,7 +41,7 @@ namespace Tweetr.Pages.Posts
                 return NotFound();
             }
 
-            var post = await _context.Posts.FirstOrDefaultAsync(m => m.Id == id);
+            var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == id || p.OriginalPostId == id);
             if (post == null)
             {
                 return NotFound();
@@ -70,6 +69,11 @@ namespace Tweetr.Pages.Posts
                     if (like != null)
                     {
                         IsLiked = true;
+                    }
+
+                    if (await _context.Posts.AnyAsync(p => (p.Id == Post.Id || p.OriginalPostId == Post.Id) && p.RepostedBy != null && p.RepostedBy.Equals(username)))
+                    {
+                        AlreadyReposted = true;
                     }
                 }
             }
@@ -363,6 +367,14 @@ namespace Tweetr.Pages.Posts
             originalPost.TotalReposts += 1;
             _context.Posts.Attach(originalPost).State = EntityState.Modified;
 
+            // Update all reposts of the original post
+            var allReposts = await _context.Posts.Where(p => p.OriginalPostId == originalPost.Id).ToListAsync();
+            foreach (var repost in allReposts)
+            {
+                repost.TotalReposts = originalPost.TotalReposts;
+                _context.Attach(repost).State = EntityState.Modified;
+            }
+
             var postCopy = new Post
             {
                 Name = originalPost.Name,
@@ -374,11 +386,10 @@ namespace Tweetr.Pages.Posts
                 TotalComments = originalPost.TotalComments,
                 TotalReposts = originalPost.TotalReposts,
                 ProfileImageUrl = originalPost.ProfileImageUrl,
+                OriginalPostId = originalPost.Id,
                 RepostedBy = username,
                 DateReposted = DateTime.UtcNow
             };
-
-            // TODO: Handle original post id
 
             _context.Posts.Add(postCopy);
             await _context.SaveChangesAsync();
