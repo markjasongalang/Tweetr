@@ -132,6 +132,15 @@ namespace Tweetr.Pages.Posts
 
                 post.TotalComments += 1;
                 _context.Attach(post).State = EntityState.Modified;
+
+                // Update reposts
+                var reposts = await _context.Posts.Where(p => p.OriginalPostId == post.Id).ToListAsync();
+                foreach (var repost in reposts)
+                {
+                    repost.TotalComments = post.TotalComments;
+                    _context.Attach(repost).State = EntityState.Modified;
+                }
+
                 try
                 {
                     await _context.SaveChangesAsync();
