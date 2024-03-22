@@ -12,7 +12,7 @@ namespace Tweetr.Models
 
         [DisplayFormat(DataFormatString = "{0:MMM dd, yyyy}", ApplyFormatInEditMode = true)]
         public DateTime DatePosted { get; set; }
-
+        [DisplayFormat(DataFormatString = "{0:MMM dd, yyyy}", ApplyFormatInEditMode = true)]
         public DateTime DateEdited { get; set; }
 
         [Required(ErrorMessage = "Please write something first.")]

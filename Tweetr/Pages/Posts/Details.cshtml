@@ -107,7 +107,12 @@
     <p style="white-space: pre-line;">@Html.DisplayFor(model => model.Post.Content)</p>
 
     <p class="text-secondary">
-        @Model.Post.DatePosted
+        @if (Model.Post.DatePosted != Model.Post.DateEdited)
+        {
+            <span>Edited: @Model.Post.DateEdited</span>
+            <br />
+        }
+        Posted: @Model.Post.DatePosted
     </p>
 
     <div class="d-flex gap-2">
