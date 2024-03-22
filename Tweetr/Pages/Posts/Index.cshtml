@@ -82,6 +82,14 @@
             toastr.success('Post successfully created!');
             sessionStorage.removeItem('postCreated');
         }
+
+        // After successful repost
+        @if (Model.RepostSuccessful)
+        {
+            <text>
+                toastr.success('Reposted successfully!');
+            </text>
+        }
     });
 
     // Enable notification for newly created post

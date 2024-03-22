@@ -8,19 +8,21 @@ namespace Tweetr.Pages.Posts
 {
     public class IndexModel : PageModel
     {
-        private readonly ApplicationDbContext _context;
-
+        // Public properties
+        public IList<Post> Posts { get;set; } = default!;
         public bool IsLoggedIn { get; set; }
 
         [BindProperty]
         public Post Post { get; set; } = default!;
+        public bool RepostSuccessful { get; set; } = false;
+
+        // Private properties
+        private readonly ApplicationDbContext _context;
 
         public IndexModel(ApplicationDbContext context)
         {
             _context = context;
         }
-
-        public IList<Post> Posts { get;set; } = default!;
 
         public async Task OnGetAsync()
         {
@@ -29,6 +31,12 @@ namespace Tweetr.Pages.Posts
                 .OrderByDescending(p => p.DatePosted)
                 .ThenByDescending(p => p.DateReposted)
                 .ToListAsync();
+
+            if (HttpContext.Session.GetString("repostSuccessful") != null)
+            {
+                RepostSuccessful = true;
+                HttpContext.Session.Remove("repostSuccessful");
+            }
         }
 
         public async Task<IActionResult> OnPostCreateAsync()

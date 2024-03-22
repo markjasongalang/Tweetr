@@ -394,7 +394,7 @@ namespace Tweetr.Pages.Posts
             _context.Posts.Add(postCopy);
             await _context.SaveChangesAsync();
 
-            // TODO: Place notification (client side)
+            HttpContext.Session.SetString("repostSuccessful", "true");
 
             return RedirectToPage("/Posts/Index");
         }
