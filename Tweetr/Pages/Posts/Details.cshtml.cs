@@ -312,7 +312,12 @@ namespace Tweetr.Pages.Posts
                 _context.Likes.Remove(rl);
             }
 
-            // TODO: Related reposts
+            // Related reposts
+            var relatedReposts = await _context.Posts.Where(p => p.OriginalPostId == post.Id).ToListAsync();
+            foreach (var rp in relatedReposts)
+            {
+                _context.Posts.Remove(rp);
+            }
 
             // Delete post itself
             _context.Posts.Remove(post);
@@ -372,6 +377,7 @@ namespace Tweetr.Pages.Posts
             return RedirectToPage("Details", new { id = Post.Id });
         }
 
+        // Repost
         public async Task<IActionResult> OnPostRepostAsync(int? id)
         {
             if (id == null)

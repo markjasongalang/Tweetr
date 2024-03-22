@@ -93,7 +93,8 @@ namespace Tweetr.Pages.Profile
             }
 
             Posts = await _context.Posts
-                    .Where(p => p.Username.Equals(User.Username) || (!string.IsNullOrEmpty(p.RepostedBy) && p.RepostedBy.Equals(User.Username)))
+                    .Where(p => (p.Username.Equals(User.Username) && p.OriginalPostId == null) || 
+                        (!string.IsNullOrEmpty(p.RepostedBy) && p.RepostedBy.Equals(User.Username)))
                     .OrderByDescending(p => p.DatePosted)
                     .ThenByDescending(p => p.DateReposted)
                     .ToListAsync();
