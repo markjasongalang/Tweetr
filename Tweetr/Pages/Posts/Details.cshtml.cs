@@ -183,6 +183,15 @@ namespace Tweetr.Pages.Posts
 
             post.TotalLikes += 1;
             _context.Attach(post).State = EntityState.Modified;
+
+            // Update reposts
+            var reposts = await _context.Posts.Where(p => p.OriginalPostId == post.Id).ToListAsync();
+            foreach (var repost in reposts)
+            {
+                repost.TotalLikes = post.TotalLikes;
+                _context.Attach(repost).State = EntityState.Modified;
+            }
+
             try
             {
                 await _context.SaveChangesAsync();
@@ -232,6 +241,15 @@ namespace Tweetr.Pages.Posts
 
             post.TotalLikes -= 1;
             _context.Attach(post).State = EntityState.Modified;
+
+            // Update reposts
+            var reposts = await _context.Posts.Where(p => p.OriginalPostId == post.Id).ToListAsync();
+            foreach (var repost in reposts)
+            {
+                repost.TotalLikes = post.TotalLikes;
+                _context.Attach(repost).State = EntityState.Modified;
+            }
+
             try
             {
                 await _context.SaveChangesAsync();
