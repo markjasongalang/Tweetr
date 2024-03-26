@@ -25,6 +25,8 @@ namespace Tweetr.Pages.Profile
         public bool RemoveCoverImage { get; set; } = false;
         [BindProperty]
         public bool RemoveProfileImage { get; set; } = false;
+        public string? ViewedUser { get; set; }
+        public bool IsFollowed { get; set; } = false;
 
         // Private fields
         private readonly ApplicationDbContext _context;
@@ -55,6 +57,16 @@ namespace Tweetr.Pages.Profile
             if (viewedUsername == null)
             {
                 IsAccount = true;
+            } else
+            {
+                ViewedUser = viewedUsername;
+
+                // Check if already followed
+                var current = HttpContext.Session.GetString("username");
+                if (current != null && await _context.Follows.AnyAsync(f => f.Following.Equals(ViewedUser) && f.Follower.Equals(current)))
+                {
+                    IsFollowed = true;
+                }
             }
 
             var loggedInUser = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(username.ToString()));
@@ -100,6 +112,71 @@ namespace Tweetr.Pages.Profile
                     .ToListAsync();
 
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostFollowAsync(string? viewedUser)
+        {
+            var username = HttpContext.Session.GetString("username");
+            if (username == null)
+            {
+                return RedirectToPage("/Login/Index");
+            }
+
+            if (viewedUser == null)
+            {
+                return NotFound();
+            }
+
+            var recipient = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(viewedUser));
+            var sender = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(username));
+            if (recipient == null || sender == null)
+            {
+                return NotFound();
+            }
+
+            var follow = new Follow
+            {
+                Following = recipient.Username,
+                Follower = sender.Username,
+                DateFollowed = DateTime.UtcNow
+            };
+
+            _context.Follows.Add(follow);
+            await _context.SaveChangesAsync();
+
+            return RedirectToPage("Index", new { viewedUsername = viewedUser });
+        }
+
+        public async Task<IActionResult> OnPostUnfollowAsync(string? viewedUser)
+        {
+            var username = HttpContext.Session.GetString("username");
+            if (username == null)
+            {
+                return RedirectToPage("/Login/Index");
+            }
+
+            if (viewedUser == null)
+            {
+                return NotFound();
+            }
+
+            var recipient = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(viewedUser));
+            var sender = await _context.Users.FirstOrDefaultAsync(u => u.Username.Equals(username));
+            if (recipient == null || sender == null)
+            {
+                return NotFound();
+            }
+
+            var follow = await _context.Follows.FirstOrDefaultAsync(f => f.Following.Equals(recipient.Username) && f.Follower.Equals(sender.Username));
+            if (follow == null)
+            {
+                return NotFound();
+            }
+
+            _context.Follows.Remove(follow);
+            await _context.SaveChangesAsync();
+
+            return RedirectToPage("Index", new { viewedUsername = viewedUser });
         }
 
         public async Task<IActionResult> OnPostEditProfileAsync(string? username)

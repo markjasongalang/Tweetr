@@ -1,7 +1,7 @@
 ﻿@page
 @model Tweetr.Pages.Profile.IndexModel
 @{
-    ViewData["Title"] = "My Profile";
+    ViewData["Title"] = "Profile";
 }
 
 <style>
@@ -116,7 +116,15 @@
             @if (!Model.IsAccount)
             {
                 <form class="py-3 px-4" method="post">
-                    <input class="btn btn-outline-primary" type="submit" value="Follow" />
+                    <!-- Follow/Unfollow -->
+                    @if (!Model.IsFollowed)
+                    {
+                        <button asp-page-handler="Follow" asp-route-viewedUser="@Model.ViewedUser" class="btn btn-outline-primary" type="submit">Follow</button>
+                    }
+                    else
+                    {
+                        <button asp-page-handler="Unfollow" asp-route-viewedUser="@Model.ViewedUser" class="btn btn-primary" type="submit">Unfollow</button>
+                    }
                 </form>
             }
             else
@@ -128,7 +136,7 @@
                         </button>
                     </div>
 
-                    <form class="py-3 ps-3 pe-4" asp-page-handler="logout" method="post">
+                    <form class="py-3 ps-3 pe-4" asp-page-handler="Logout" method="post">
                         <input class="btn btn-outline-danger" type="submit" value="Logout" />
                     </form>
                 </div>
