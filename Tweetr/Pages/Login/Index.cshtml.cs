@@ -7,8 +7,7 @@ namespace Tweetr.Pages.Login
 {
     public class IndexModel : PageModel
     {
-        private readonly ApplicationDbContext _context;
-
+        // Public properties
         [BindProperty]
         public required string Username { get; set; }
         [BindProperty]
@@ -16,12 +15,14 @@ namespace Tweetr.Pages.Login
 
         public string? Message { get; set; }
 
+        // Private properties
+
+        private readonly ApplicationDbContext _context;
+
         public IndexModel(ApplicationDbContext context)
         {
             _context = context;
         }
-
-        /** Handler Methods **/
 
         public IActionResult OnGet()
         {
@@ -48,7 +49,7 @@ namespace Tweetr.Pages.Login
                 return Page();
             }
 
-            // Set session
+            // Store username in session storage
             HttpContext.Session.SetString("username", user.Username);
 
             return RedirectToPage("/Posts/Index");
