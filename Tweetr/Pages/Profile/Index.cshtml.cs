@@ -27,6 +27,8 @@ namespace Tweetr.Pages.Profile
         public bool RemoveProfileImage { get; set; } = false;
         public string? ViewedUser { get; set; }
         public bool IsFollowed { get; set; } = false;
+        public int Following { get; set; }
+        public int Followers { get; set; }
 
         // Private fields
         private readonly ApplicationDbContext _context;
@@ -103,6 +105,9 @@ namespace Tweetr.Pages.Profile
                 HttpContext.Session.Remove("hasNameError");
                 EditProfileStatus = "error";
             }
+
+            Following = await _context.Follows.CountAsync(f => f.Follower.Equals(User.Username));
+            Followers = await _context.Follows.CountAsync(f => f.Following.Equals(User.Username));
 
             Posts = await _context.Posts
                     .Where(p => (p.Username.Equals(User.Username) && p.OriginalPostId == null) || 

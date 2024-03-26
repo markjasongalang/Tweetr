@@ -156,9 +156,17 @@
 
             <!-- TODO: Refer to 'Follow' table -->
             <p>
-                <strong>0</strong> <span class="text-secondary">Following</span>
+                <strong>@Model.Following</strong> <span class="text-secondary">Following</span>
                 &nbsp;&nbsp;
-                <strong>0</strong> <span class="text-secondary">Followers</span>
+                <strong>@Model.Followers</strong>
+                @if (Model.Followers == 1)
+                {
+                    <span class="text-secondary">Follower</span>
+                }
+                else
+                {
+                    <span class="text-secondary">Followers</span>
+                }
             </p>
         </div>
 
