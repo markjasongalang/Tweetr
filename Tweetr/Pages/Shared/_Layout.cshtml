@@ -36,7 +36,14 @@
 
                         <!-- Login -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-page="/Login/Index">Login</a>
+                            @if (this.ViewContext.HttpContext.Session.GetString("username") == null)
+                            {
+                                <a class="nav-link text-dark" asp-page="/Login/Index">Login</a>
+                            }
+                            else
+                            {
+                                <a class="nav-link"><span class="badge rounded-pill bg-secondary"><i class="bi bi-person"></i>&nbsp;@this.ViewContext.HttpContext.Session.GetString("username")</span></a>
+                            }
                         </li>
 
                     </ul>
@@ -57,6 +64,7 @@
         </div>
     </footer>
 
+    <!-- Bootstrap (JQuery & JavaScript) -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
