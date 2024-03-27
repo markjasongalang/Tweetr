@@ -1,3 +1,4 @@
+using BCrypt.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -61,7 +62,7 @@ namespace Tweetr.Pages.Signup
                 return Page();
             }
 
-            // TODO: Hash password
+            User.Password = BCrypt.Net.BCrypt.EnhancedHashPassword(User.Password);
 
             User.ProfileImageUrl = @"images/profile/default_profile_image.jpg";
             User.CoverImageUrl = null;

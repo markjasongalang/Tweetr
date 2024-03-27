@@ -43,7 +43,7 @@ namespace Tweetr.Pages.Login
             }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == Username);
-            if (user == null || Password != user.Password)
+            if (user == null || !BCrypt.Net.BCrypt.EnhancedVerify(Password, user.Password))
             {
                 Message = "Incorrect username or password.";
                 return Page();
