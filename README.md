@@ -1,5 +1,5 @@
 # Tweetr
-Tweetr is a simple Twitter-like web application built using ASP.NET Core Razor Pages. It allows users to post tweets, follow other users, and interact with their timeline.
+Tweetr is a simple Twitter-like web application built using ASP.NET Core Razor Pages. It allows users to post tweets, follow other users, and interact with them.
 
 ## Features
 
