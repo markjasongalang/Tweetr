@@ -31,7 +31,7 @@ Contributions are welcome! If you find any bugs or have suggestions for new feat
 
 ## License
 
-This project is licensed under the [License](LICENSE).
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 
 ## Acknowledgments
 
