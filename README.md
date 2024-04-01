@@ -11,7 +11,7 @@ Tweetr is a simple Twitter-like web application built using ASP.NET Core Razor P
 
 ## Prerequisites
 
-- [.NET Core SDK](https://dotnet.microsoft.com/download) installed on your machine.
+- [.NET Core SDK](https://dotnet.microsoft.com/download) installed on your machine (i.e., .NET 7).
 
 ## Getting Started
 
